@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "corporate-background",
-      "description": "A black and white photo of a modern building with a glass facade.",
-      "imageUrl": "https://images.unsplash.com/photo-1516475429286-465d8cce794a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxibGFjayUyMGFuZCUyMHdoaXRlJTIwY29ycG9yYXRlJTIwYnVpbGRpbmd8ZW58MHx8fHwxNzE2NDAxODgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "building facade"
+      "description": "A black and white photo of people walking in a modern office.",
+      "imageUrl": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxibGFjayUyMGFuZCUyMHdoaXRlJTIwY29ycG9yYXRlJTIwcGVvcGxlfGVufDB8fHx8MTcyMTMyOTM4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "people office"
     }
   ]
 }
