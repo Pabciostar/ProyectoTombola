@@ -46,14 +46,14 @@ export default function Home() {
             <p className="text-lg text-primary-foreground/80 mb-8">Your randomly generated access code is below.</p>
           </div>
           <div
-            className="flex space-x-2 md:space-x-4 rounded-lg border-2 border-accent bg-background/90 p-4 md:p-8 shadow-[0_0_20px_hsl(var(--accent))] backdrop-blur-sm"
+            className="flex space-x-2 md:space-x-4"
             aria-live="polite"
             aria-atomic="true"
           >
             {(isMounted ? code : '----').split('').map((digit, index) => (
               <div
                 key={index}
-                className="flex h-20 w-14 items-center justify-center rounded-md bg-card text-5xl font-bold text-card-foreground shadow-inner md:h-28 md:w-20 md:text-7xl font-code"
+                className="flex h-20 w-14 items-center justify-center rounded-md border-2 border-accent bg-black text-5xl font-bold text-white shadow-[0_0_10px_hsl(var(--accent))] md:h-28 md:w-20 md:text-7xl font-code"
               >
                 {digit}
               </div>
@@ -64,7 +64,7 @@ export default function Home() {
 
       {/* Right Black Bar */}
       <div className="flex items-center justify-center h-full w-40 shrink-0 bg-black md:w-48" aria-hidden="true">
-        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl]">
+        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl]" style={{textOrientation: 'mixed'}}>
           Code Dispenser
         </h1>
       </div>
