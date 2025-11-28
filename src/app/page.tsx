@@ -39,9 +39,7 @@ export default function Home() {
 
         <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center">
           <div className="max-w-md">
-            <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg md:text-6xl mb-2">
-              Code Dispenser
-            </h1>
+            
             <p className="text-lg text-primary-foreground/80 mb-8">Your randomly generated access code is below.</p>
           </div>
           <div
@@ -62,7 +60,11 @@ export default function Home() {
       </div>
 
       {/* Right Black Bar */}
-      <div className="h-full w-4 shrink-0 bg-primary/95 md:w-8" aria-hidden="true"></div>
+      <div className="flex items-center justify-center h-full w-12 shrink-0 bg-primary/95 md:w-16" aria-hidden="true">
+        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+          Code Dispenser
+        </h1>
+      </div>
     </main>
   );
 }
