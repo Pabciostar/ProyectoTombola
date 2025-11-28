@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <main className="relative flex h-screen w-screen overflow-hidden bg-background">
       {/* Left Red Bar */}
-      <div className="flex h-full w-16 shrink-0 flex-col bg-accent p-4 pt-6 md:w-20">
+      <div className="flex h-full w-20 shrink-0 flex-col bg-accent p-4 pt-6 md:w-24">
         <Zap className="h-8 w-8 text-accent-foreground" />
       </div>
 
@@ -63,7 +63,7 @@ export default function Home() {
       </div>
 
       {/* Right Black Bar */}
-      <div className="flex items-center justify-center h-full w-12 shrink-0 bg-primary/95 md:w-16" aria-hidden="true">
+      <div className="flex items-center justify-center h-full w-40 shrink-0 bg-black md:w-48" aria-hidden="true">
         <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl]">
           Code Dispenser
         </h1>
