@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Zap } from 'lucide-react';
 
 const CODES = ['3819', '7452', '9012', '5548', '1670', '8321', '4965'];
 
@@ -21,7 +22,9 @@ export default function Home() {
   return (
     <main className="relative flex h-screen w-screen overflow-hidden bg-background">
       {/* Left Red Bar */}
-      <div className="h-full w-2 shrink-0 bg-accent md:w-4" aria-hidden="true"></div>
+      <div className="flex h-full w-16 shrink-0 flex-col bg-accent p-4 pt-6 md:w-20">
+        <Zap className="h-8 w-8 text-accent-foreground" />
+      </div>
 
       {/* Main Content */}
       <div className="relative flex-grow h-full">
@@ -61,7 +64,7 @@ export default function Home() {
 
       {/* Right Black Bar */}
       <div className="flex items-center justify-center h-full w-12 shrink-0 bg-primary/95 md:w-16" aria-hidden="true">
-        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl]">
           Code Dispenser
         </h1>
       </div>
