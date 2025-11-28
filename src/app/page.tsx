@@ -1,21 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, Zap } from 'lucide-react';
 
-const CODES = ['3819', '7452', '9012', '5548', '1670', '8321', '4965'];
+const CODES = ['1010', '2030', '3020', '4090'];
 
 export default function Home() {
   const [code, setCode] = useState('----');
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
+  const generateCode = () => {
     const randomIndex = Math.floor(Math.random() * CODES.length);
     setCode(CODES[randomIndex]);
-  }, []);
+  };
 
   const backgroundImage = PlaceHolderImages.find(p => p.id === 'corporate-background');
 
@@ -50,7 +49,7 @@ export default function Home() {
             aria-live="polite"
             aria-atomic="true"
           >
-            {(isMounted ? code : '----').split('').map((digit, index) => (
+            {code.split('').map((digit, index) => (
               <div
                 key={index}
                 className="flex h-20 w-14 items-center justify-center rounded-md border-2 border-accent bg-black text-5xl font-bold text-white shadow-[0_0_10px_hsl(var(--accent))] md:h-28 md:w-20 md:text-7xl font-code"
@@ -59,6 +58,10 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <Button onClick={generateCode} className="mt-12" variant="secondary" size="lg">
+            <RefreshCw className="mr-2 h-5 w-5" />
+            Generate New Code
+          </Button>
         </div>
       </div>
 
