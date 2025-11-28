@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "corporate-background",
-      "description": "An overhead view of people walking in a large corporate building lobby.",
-      "imageUrl": "https://images.unsplash.com/photo-1758518728154-d10275e0515e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBvdmVyaGVhZHxlbnwwfHx8fDE3NjQzNjEwMzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "corporate overhead"
+      "description": "A black and white photo of a modern building with a glass facade.",
+      "imageUrl": "https://images.unsplash.com/photo-1516475429286-465d8cce794a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxibGFjayUyMGFuZCUyMHdoaXRlJTIwY29ycG9yYXRlJTIwYnVpbGRpbmd8ZW58MHx8fHwxNzE2NDAxODgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "building facade"
     }
   ]
 }
