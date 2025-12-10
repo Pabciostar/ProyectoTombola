@@ -6,10 +6,10 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Zap } from 'lucide-react';
 
-const CODES = ['1010', '2030', '3020', '4090'];
+const CODES = ['10102020', '20304040', '30201010', '40908080'];
 
 export default function Home() {
-  const [code, setCode] = useState('----');
+  const [code, setCode] = useState('--------');
 
   const generateCode = () => {
     const randomIndex = Math.floor(Math.random() * CODES.length);
