@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,23 @@ const CODES = ['10102020', '20304040', '30201010', '40908080'];
 
 export default function Home() {
   const [code, setCode] = useState('--------');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const generateCode = () => {
-    const randomIndex = Math.floor(Math.random() * CODES.length);
-    setCode(CODES[randomIndex]);
+    if (isAnimating) return;
+
+    setIsAnimating(true);
+    let animationInterval = setInterval(() => {
+      const randomCode = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+      setCode(randomCode);
+    }, 50);
+
+    setTimeout(() => {
+      clearInterval(animationInterval);
+      const randomIndex = Math.floor(Math.random() * CODES.length);
+      setCode(CODES[randomIndex]);
+      setIsAnimating(false);
+    }, 1000);
   };
 
   const backgroundImage = PlaceHolderImages.find(p => p.id === 'corporate-background');
@@ -58,9 +71,9 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <Button onClick={generateCode} className="mt-10 md:mt-12" variant="secondary" size="lg">
-            <RefreshCw className="mr-2 h-5 w-5" />
-            Generate New Code
+          <Button onClick={generateCode} className="mt-10 md:mt-12" variant="secondary" size="lg" disabled={isAnimating}>
+            <RefreshCw className={`mr-2 h-5 w-5 ${isAnimating ? 'animate-spin' : ''}`} />
+            {isAnimating ? 'Generating...' : 'Generate New Code'}
           </Button>
         </div>
       </div>
