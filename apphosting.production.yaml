@@ -1,0 +1,12 @@
+# apphosting.production.yaml (ejemplo)
+
+environment:
+  # 1. SEGURIDAD: Dominio Permitido (Tu URL de Firebase App Hosting)
+  ALLOWED_ORIGIN: "https://proyectotombola-51309.us-east4.hosted.app"
+
+  # 2. DATA: URL del Google Sheet
+  GOOGLE_SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1OdGa-kyQ61MVB9okiGrYMmuNUDqaOQo5/gviz/tq?tqx=out:csv&sheet=Hoja1"
+
+  # 3. BACKEND: Credenciales de Firebase Admin (Referencia al Secreto)
+  FIREBASE_ADMIN_CREDENTIALS_PATH:
+    secret: "firebase-admin-key" 
