@@ -9,12 +9,17 @@ const TARGET_ROLE = 'sorteador';
 
 // --- INICIALIZACIÓN DEL SDK ADMIN (Lógica para Producción/Secret Manager) ---
 if (!admin.apps.length) {
-    const serviceAccountJson = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
-    
+    console.log("Intentando inicializar Firebase Admin..."); 
+            
+            // ⚠️ Intenta reemplazar los saltos de línea escapados si existen
+            const serviceAccountJson = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
+            
+            
     if (serviceAccountJson) {
         try {
-            // El valor de la variable de entorno es el JSON string completo
-            const serviceAccount = JSON.parse(serviceAccountJson); 
+            const cleanJsonString = serviceAccountJson.replace(/\\n/g, '\n'); 
+            
+            const serviceAccount = JSON.parse(cleanJsonString);
             
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),

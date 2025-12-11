@@ -4,16 +4,34 @@ import * as admin from 'firebase-admin';
 
 // Inicialización del SDK Admin (Solo si no está inicializado)
 if (!admin.apps.length) {
-    const serviceAccountPath = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
+    // Renombramos la variable para reflejar que puede ser contenido o ruta
+    const serviceAccountContentOrPath = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
 
-    if (serviceAccountPath) {
-        const serviceAccount = require(serviceAccountPath);
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            projectId: "proyectotombola-51309",
-        });
+    if (serviceAccountContentOrPath) {
+        try {
+            let serviceAccount;
+
+            // 1. INTENTAR COMO CADENA JSON (Producción/Secret Manager)
+            // Si el valor comienza con '{', asumimos que es la cadena JSON completa
+            if (serviceAccountContentOrPath.trim().startsWith('{')) {
+                serviceAccount = JSON.parse(serviceAccountContentOrPath);
+            } else {
+                // 2. ASUMIR COMO RUTA DE ARCHIVO (Desarrollo Local)
+                // Si no es JSON, asumimos que es una ruta local y usamos require
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                serviceAccount = require(serviceAccountContentOrPath);
+            }
+
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                projectId: "proyectotombola-51309",
+            });
+            console.log("Firebase Admin SDK inicializado correctamente.");
+
+        } catch (error) {
+            console.error("ERROR CRÍTICO al inicializar Firebase Admin:", error);
+        }
     } else {
-        // Falla la inicialización si la clave no está presente
         console.error("ERROR: Clave de servicio Admin no configurada.");
     }
 }
