@@ -14,13 +14,17 @@ if (!admin.apps.length) {
             // 1. INTENTAR COMO CADENA JSON (Producción/Secret Manager)
             // Si el valor comienza con '{', asumimos que es la cadena JSON completa
             if (serviceAccountContentOrPath.trim().startsWith('{')) {
-                serviceAccount = JSON.parse(serviceAccountContentOrPath);
+                const cleanJsonString = serviceAccountContentOrPath.replace(/\\n/g, '\n');
+                
+                serviceAccount = JSON.parse(cleanJsonString);
+                
             } else {
                 // 2. ASUMIR COMO RUTA DE ARCHIVO (Desarrollo Local)
                 // Si no es JSON, asumimos que es una ruta local y usamos require
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
                 serviceAccount = require(serviceAccountContentOrPath);
             }
+            
 
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
