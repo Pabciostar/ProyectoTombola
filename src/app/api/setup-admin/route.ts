@@ -7,46 +7,59 @@ import { NextRequest } from 'next/server';
 const ADMIN_EMAIL_TO_SETUP = 'pablo.lpzh@gmail.com';
 const TARGET_ROLE = 'sorteador';
 
-// --- INICIALIZACIÓN DEL SDK ADMIN (Lógica para Producción/Secret Manager) ---
-if (!admin.apps.length) {
-    console.log("Intentando inicializar Firebase Admin...");
-
-    // ⚠️ Intenta reemplazar los saltos de línea escapados si existen
+// --- INICIALIZACIÓN DEL SDK ADMIN (Lógica reforzada) ---
+function initializeFirebaseAdmin() {
+    if (admin.apps.length) {
+        console.log("Firebase Admin ya estaba inicializado.");
+        return true;
+    }
+    
     const serviceAccountContentOrPath = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
 
+    if (!serviceAccountContentOrPath) {
+        console.error("ERROR: Clave de servicio Admin no configurada.");
+        return false;
+    }
 
-    if (serviceAccountContentOrPath) {
-        try {
-            let serviceAccount;
-
-            if (serviceAccountContentOrPath.trim().startsWith('{')) {
-                // Ahora parseamos DIRECTAMENTE, confiando en que Secret Manager envió el JSON correcto
-                serviceAccount = JSON.parse(serviceAccountContentOrPath);
-            } else {
-                // Código para entorno local
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                serviceAccount = require(serviceAccountContentOrPath);
-            }
-
-            // 3. Inicialización
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount),
-                projectId: serviceAccount.project_id || "proyectotombola-51309",
-            });
-            console.log("✅ Admin SDK inicializado.");
-
-        } catch (e: any) {
-            console.error(
-                "❌ ERROR CRÍTICO EN FIREBASE INIT:",
-                e.message
-            );
+    try {
+        let serviceAccount;
+        
+        // 1. Intentar como JSON puro
+        if (serviceAccountContentOrPath.trim().startsWith('{')) {
+            serviceAccount = JSON.parse(serviceAccountContentOrPath);
+        } else {
+            // 2. Intentar como ruta local
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            serviceAccount = require(serviceAccountContentOrPath);
         }
+        
+        // 3. Inicialización
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            projectId: serviceAccount.project_id || "proyectotombola-51309",
+        });
+        console.log("✅ Admin SDK inicializado exitosamente.");
+        return true;
+
+    } catch (e: any) {
+        // ❌ Este mensaje aparecerá en los logs si falla JSON.parse o initializeApp
+        console.error(
+            "❌ ERROR FATAL DE INICIALIZACIÓN (Verificar Secret Manager y JSON):", 
+            e.message
+        );
+        return false;
     }
 }
+
+// Llama a la función al inicio del módulo
+const IS_ADMIN_SDK_INITIALIZED = initializeFirebaseAdmin();
 // --------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
 
+    if (!IS_ADMIN_SDK_INITIALIZED) {
+         return Response.json({ error: "El SDK de Firebase Admin no pudo inicializarse. Revisar logs de Cloud." }, { status: 500 });
+    }
     // --- SEGURIDAD ÚNICA: CLAVE TEMPORAL ---
     const secretKey = request.nextUrl.searchParams.get('key');
     const MY_SECR3T_SETUP_KEY = 'MiTombola2025';
