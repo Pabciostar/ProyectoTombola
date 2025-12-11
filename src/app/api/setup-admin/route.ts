@@ -12,21 +12,34 @@ if (!admin.apps.length) {
     console.log("Intentando inicializar Firebase Admin..."); 
             
             // ⚠️ Intenta reemplazar los saltos de línea escapados si existen
-            const serviceAccountJson = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
+            const serviceAccountContentOrPath = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
             
             
-    if (serviceAccountJson) {
+    if (serviceAccountContentOrPath) {
         try {
-            const cleanJsonString = serviceAccountJson.replace(/\\n/g, '\n'); 
+            let serviceAccount;
+
+            if (serviceAccountContentOrPath.trim().startsWith('{')) {
+                // Ahora parseamos DIRECTAMENTE, confiando en que Secret Manager envió el JSON correcto
+                serviceAccount = JSON.parse(serviceAccountContentOrPath);
+            } else {
+                // Código para entorno local
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                serviceAccount = require(serviceAccountContentOrPath);
+            }
             
-            const serviceAccount = JSON.parse(cleanJsonString);
-            
+            // 3. Inicialización
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
                 projectId: serviceAccount.project_id || "proyectotombola-51309",
             });
-        } catch (e) {
-            console.error("ERROR: Fallo al parsear o inicializar Firebase Admin en setup-admin.", e);
+            console.log("✅ Admin SDK inicializado.");
+
+        } catch (e: any) {
+            console.error(
+                "❌ ERROR CRÍTICO EN FIREBASE INIT:", 
+                e.message
+            );
         }
     }
 }

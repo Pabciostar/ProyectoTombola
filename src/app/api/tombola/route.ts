@@ -11,29 +11,27 @@ if (!admin.apps.length) {
         try {
             let serviceAccount;
 
-            // 1. INTENTAR COMO CADENA JSON (Producción/Secret Manager)
-            // Si el valor comienza con '{', asumimos que es la cadena JSON completa
             if (serviceAccountContentOrPath.trim().startsWith('{')) {
-                const cleanJsonString = serviceAccountContentOrPath.replace(/\\n/g, '\n');
-                
-                serviceAccount = JSON.parse(cleanJsonString);
-                
+                // Ahora parseamos DIRECTAMENTE, confiando en que Secret Manager envió el JSON correcto
+                serviceAccount = JSON.parse(serviceAccountContentOrPath);
             } else {
-                // 2. ASUMIR COMO RUTA DE ARCHIVO (Desarrollo Local)
-                // Si no es JSON, asumimos que es una ruta local y usamos require
+                // Código para entorno local
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
                 serviceAccount = require(serviceAccountContentOrPath);
             }
             
-
+            // 3. Inicialización
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
-                projectId: "proyectotombola-51309",
+                projectId: serviceAccount.project_id || "proyectotombola-51309",
             });
-            console.log("Firebase Admin SDK inicializado correctamente.");
+            console.log("✅ Admin SDK inicializado.");
 
-        } catch (error) {
-            console.error("ERROR CRÍTICO al inicializar Firebase Admin:", error);
+        } catch (e: any) {
+            console.error(
+                "❌ ERROR CRÍTICO EN FIREBASE INIT:", 
+                e.message
+            );
         }
     } else {
         console.error("ERROR: Clave de servicio Admin no configurada.");
