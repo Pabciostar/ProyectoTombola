@@ -1,7 +1,21 @@
-# Settings to manage and configure a Firebase App Hosting backend.
-# https://firebase.google.com/docs/app-hosting/configure
+# apphosting.yaml
 
+# Settings for Cloud Run
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+
+# Environment variables and secrets
+env:
+  # Referencia al secreto en Cloud Secret Manager
+  # El nombre de la variable de entorno DEBE coincidir con el código
+  - variable: FIREBASE_ADMIN_CREDENTIALS_PATH
+    secret: firebase-admin-key
+  
+  # Incluye aquí tu otra variable:
+  - variable: ALLOWED_ORIGIN
+    value: https://proyectotombola--proyectotombola-51309.us-east4.hosted.app
+
+  - variable: GOOGLE_SHEET_CSV_URL
+    value: https://docs.google.com/spreadsheets/d/1OdGa-kyQ61MVB9okiGrYMmuNUDqaOQo5/gviz/tq?tqx=out:csv&sheet=Hoja1
