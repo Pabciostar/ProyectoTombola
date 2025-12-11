@@ -6,6 +6,16 @@ runConfig:
   # more instances in response to increased traffic.
   maxInstances: 1
 
+
+# Cabeceras de respuesta que afectan a la política de seguridad del navegador
+headers:
+  - headers:
+      # Esto le dice al navegador que la ventana abierta por el pop-up de Google
+      # es segura para comunicarse y cerrarse.
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+    path: '/**' # Aplica esta cabecera a todas las rutas
+
+    
 # Environment variables and secrets
 env:
   # Referencia al secreto en Cloud Secret Manager
