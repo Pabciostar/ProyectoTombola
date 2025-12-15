@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Zap, LogIn, LogOut } from 'lucide-react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+
+// ----------------------------------------------------
+// 1. RUTA DE LA IMAGEN OFICIAL
+// ----------------------------------------------------
+const OFFICIAL_BG_URL = '/base1.png';
+// Asume que base1.png está en la carpeta /public de tu proyecto.
 
 // --- Configuración de Firebase (Se mantiene) ---
 const firebaseConfig = {
@@ -116,96 +121,88 @@ export default function TombolaPage() {
   };
 
 
-  const backgroundImage = PlaceHolderImages.find(p => p.id === 'corporate-background');
+  // NOTA: Se eliminan las PlaceHolderImages ya que se usa OFFICIAL_BG_URL
+  // const backgroundImage = PlaceHolderImages.find(p => p.id === 'corporate-background');
 
   // Determinar si el botón debe estar deshabilitado
   const isButtonDisabled = isAnimating || !user || statusMessage.includes('Permiso Denegado');
 
 
   return (
-    <main className="relative flex h-screen w-screen overflow-hidden bg-background">
-      {/* Barra superior con Login/Logout */}
-      <div className="absolute top-0 right-0 z-20 p-4">
-        {user ? (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-white/80 hidden md:inline">
-              Logueado como: **{user.displayName || user.email}**
-            </span>
-            <Button onClick={handleLogout} variant="secondary" size="sm" title="Cerrar Sesión">
-              <LogOut className="mr-2 h-4 w-4" /> Salir
+    // 1. Contenedor principal: Ocupa toda la pantalla y habilita el posicionamiento de capas
+    <main className="relative h-screen w-screen overflow-hidden">
+
+      {/* 2. Fondo Total PNG: CUBRE TODA LA PANTALLA (Reemplaza las barras de color y el fondo central) */}
+      <Image
+        src={OFFICIAL_BG_URL}
+        alt="Fondo oficial de la tómbola"
+        fill
+        className="object-cover" // Asegura que cubre todo y es responsivo
+        priority
+      />
+
+      {/* 3. Capa de Opacidad/Overlay: Ajusta el brillo para que el texto sea legible. */}
+      <div className="absolute inset-0 bg-black/20 backdrop-brightness-75" aria-hidden="true"></div>
+
+
+      {/* 4. Contenido Central (Flotante - z-10) */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center">
+
+        {/* Barra superior con Login/Logout */}
+        <div className="absolute top-0 right-0 z-20 p-4">
+          {user ? (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-white/80 hidden md:inline">
+                Logueado como: **{user.displayName || user.email}**
+              </span>
+              <Button onClick={handleLogout} variant="secondary" size="sm" title="Cerrar Sesión">
+                <LogOut className="mr-2 h-4 w-4" /> Salir
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={handleLogin} variant="secondary" size="sm">
+              <LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión (Google)
             </Button>
-          </div>
-        ) : (
-          <Button onClick={handleLogin} variant="secondary" size="sm">
-            <LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión (Google)
-          </Button>
-        )}
-      </div>
-
-      {/* Left Red Bar (Se mantiene) */}
-      <div className="hidden h-full shrink-0 flex-col bg-accent p-4 pt-6 sm:flex sm:w-20 md:w-24">
-        <Zap className="h-8 w-8 text-accent-foreground" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative flex-grow h-full">
-        {/* Background Image/Overlay (Se mantiene) */}
-        {backgroundImage && (
-          <Image
-            src={backgroundImage.imageUrl}
-            alt={backgroundImage.description}
-            fill
-            className="object-cover"
-            data-ai-hint={backgroundImage.imageHint}
-            priority
-          />
-        )}
-        <div className="absolute inset-0 bg-primary/60 backdrop-brightness-75" aria-hidden="true"></div>
-
-        <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center">
-          {/* Título y Mensajes */}
-          <div className="max-w-md">
-            <h2 className="text-xl font-bold text-accent mb-2">Tómbola Segura</h2>
-            <p className="text-base text-primary-foreground/80 mb-6 md:text-lg md:mb-8">
-              {statusMessage}
-            </p>
-          </div>
-
-          {/* Display del Código */}
-          <div
-            className="flex space-x-1 md:space-x-2"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {code.split('').map((digit, index) => (
-              <div
-                key={index}
-                className="flex h-16 w-10 items-center justify-center rounded-md border-2 border-accent bg-black text-4xl font-bold text-white shadow-[0_0_10px_hsl(var(--accent))] sm:h-20 sm:w-14 sm:text-5xl md:h-28 md:w-24 md:text-7xl font-mono leading-none"
-              >
-                {digit}
-              </div>
-            ))}
-          </div>
-
-          {/* Botón de Sorteo */}
-          <Button
-            onClick={generateCode}
-            className="mt-10 md:mt-12"
-            variant="secondary"
-            size="lg"
-            disabled={isButtonDisabled}
-          >
-            <RefreshCw className={`mr-2 h-5 w-5 ${isAnimating ? 'animate-spin' : ''}`} />
-            {isAnimating ? 'Generando...' : (user ? 'Generar Nuevo Código' : 'Inicia Sesión')}
-          </Button>
+          )}
         </div>
-      </div>
 
-      {/* Right Black Bar (Se mantiene) */}
-      <div className="hidden items-center justify-center h-full shrink-0 bg-black sm:flex sm:w-40 md:w-48" aria-hidden="true">
-        <h1 className="text-4xl font-headline font-bold text-primary-foreground drop-shadow-lg [writing-mode:vertical-rl]" style={{ textOrientation: 'mixed' }}>
-          Code Dispenser
-        </h1>
+
+        {/* Título y Mensajes */}
+        <div className="max-w-md">
+          <h2 className="text-xl font-bold text-accent mb-2">Tómbola Segura</h2>
+          <p className="text-base text-primary-foreground/80 mb-6 md:text-lg md:mb-8">
+            {statusMessage}
+          </p>
+        </div>
+
+        {/* Display del Código */}
+        <div
+          className="flex space-x-1 md:space-x-2"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {code.split('').map((digit, index) => (
+            <div
+              key={index}
+              // Corrección gráfica: Añadido md:w-24 y leading-none para centrado perfecto.
+              className="flex h-16 w-10 items-center justify-center rounded-md border-2 border-accent bg-black text-4xl font-bold text-white shadow-[0_0_10px_hsl(var(--accent))] sm:h-20 sm:w-14 sm:text-5xl md:h-28 md:w-24 md:text-7xl font-mono leading-none"
+            >
+              {digit}
+            </div>
+          ))}
+        </div>
+
+        {/* Botón de Sorteo */}
+        <Button
+          onClick={generateCode}
+          className="mt-10 md:mt-12"
+          variant="secondary"
+          size="lg"
+          disabled={isButtonDisabled}
+        >
+          <RefreshCw className={`mr-2 h-5 w-5 ${isAnimating ? 'animate-spin' : ''}`} />
+          {isAnimating ? 'Generando...' : (user ? 'Generar Nuevo Código' : 'Inicia Sesión')}
+        </Button>
       </div>
     </main>
   );
