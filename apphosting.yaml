@@ -28,4 +28,4 @@ env:
     value: https://proyectotombola--proyectotombola-51309.us-east4.hosted.app/ 
 
   - variable: GOOGLE_SHEET_CSV_URL
-    value: https://docs.google.com/spreadsheets/d/1OdGa-kyQ61MVB9okiGrYMmuNUDqaOQo5/gviz/tq?tqx=out:csv&sheet=Hoja1
+    secret: TOMBOLA_SHEET_URL_PROD
