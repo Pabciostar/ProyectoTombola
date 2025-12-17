@@ -126,7 +126,7 @@ export default function TombolaPage() {
             style={{
               top: '45.5%',  
               left: '10%',    // Izquierda
-              width: '68%',  // Compacto
+              width: '70%',  // Compacto
               height: '10%'
             }}
           >
