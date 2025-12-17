@@ -3,17 +3,15 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Zap, LogIn, LogOut } from 'lucide-react';
+import { RefreshCw, LogIn, LogOut } from 'lucide-react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 
 // ----------------------------------------------------
-// 1. RUTA DE LA IMAGEN OFICIAL
+// 1. CONFIGURACIÓN E IMÁGENES
 // ----------------------------------------------------
 const OFFICIAL_BG_URL = '/base1.png';
-// Asegúrate de que base1.png esté en la carpeta /public.
 
-// --- Configuración de Firebase (Se mantiene) ---
 const firebaseConfig = {
   apiKey: "AIzaSyBeaDm9nv8fcXXlxr4oo46OWOLeuDyTIY0",
   authDomain: "proyectotombola-51309.firebaseapp.com",
@@ -26,13 +24,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider(); // Proveedor de Google
-
-// --- CODES NO NECESARIO: El sorteo lo hace la API ---
-// const CODES = ['10102020', '20304040', '30201010', '40908080'];
-
-
-
+const googleProvider = new GoogleAuthProvider();
 
 export default function TombolaPage() {
   const [code, setCode] = useState('--------');
@@ -40,187 +32,130 @@ export default function TombolaPage() {
   const [user, setUser] = useState<User | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>('Esperando credenciales...');
 
-
-  // 1. VERIFICACIÓN DE AUTENTICACIÓN AL CARGAR
+  // 1. VERIFICACIÓN DE AUTENTICACIÓN
   useEffect(() => {
-    // Escucha los cambios de estado de autenticación (login/logout)
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        setStatusMessage(`Hola, ${currentUser.displayName}. Verifica tu rol...`);
-        // Forzar la obtención del token para actualizar los claims (roles) si acaban de ser asignados
+        setStatusMessage(`Hola, ${currentUser.displayName}.`);
         await currentUser.getIdToken(true);
       } else {
-        setStatusMessage('Debes iniciar sesión para usar la tómbola.');
+        setStatusMessage('Debes iniciar sesión.');
       }
     });
-    return () => unsubscribe(); // Limpieza del listener
+    return () => unsubscribe();
   }, []);
 
-  const getToken = async () => {
-    try {
-      const token = await auth.currentUser?.getIdToken();
-      if (token) {
-        console.log("🔥 TU ID TOKEN JWT DE ADMINISTRADOR ES:");
-        console.log(token);
-      } else {
-        console.log("Usuario no logueado o token no disponible.");
-      }
-    } catch (e) {
-      console.error("Error al obtener el token:", e);
-    }
-  };
-
-
-
-  // 2. LÓGICA DE SORTEO MODIFICADA (Llama a la API Segura)
+  // 2. LÓGICA DE SORTEO
   const generateCode = async () => {
-    if (isAnimating || !user) return; // Bloquear si no hay usuario o está animando
-
+    if (isAnimating || !user) return;
     setIsAnimating(true);
 
-    // 2.1 Animación de Tómbola (Visual, aún usa random localmente)
     let animationInterval = setInterval(() => {
       const randomCode = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
       setCode(randomCode);
     }, 50);
 
     try {
-      // 2.2 Obtener el Token de ID (Necesario para el Backend)
       const token = await user.getIdToken();
-
-      // 2.3 Llamada a la API Route Segura
       const response = await fetch('/api/tombola', {
-        headers: {
-          'Authorization': `Bearer ${token}`, // Envía el token para verificación de Login y Rol
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        let errorMessage = data.error || `Error HTTP: ${response.status}`;
-
-        if (response.status === 403) {
-          errorMessage = "🚫 Permiso Denegado. No tienes el rol 'sorteador'.";
-        } else if (response.status === 401) {
-          errorMessage = "⚠️ Sesión expirada o Token inválido. Vuelve a iniciar sesión.";
-        }
-
-        throw new Error(errorMessage);
+        throw new Error(data.error || "Error en el sorteo");
       }
 
-      // 2.4 Finalizar animación y mostrar código real
-      setStatusMessage(`¡Sorteo exitoso! Código generado por ${user.displayName}.`);
-      setCode(data.selectedID); // <-- Usamos el ID real de Google Sheets
-
+      setCode(data.selectedID);
     } catch (err: any) {
-      console.error("Error de Tómbola/Auth:", err);
+      console.error(err);
       setStatusMessage(err.message);
-      setCode('--------'); // Reiniciar visualmente
+      setCode('--------');
     } finally {
-      clearInterval(animationInterval); // Detener animación
+      clearInterval(animationInterval);
       setIsAnimating(false);
     }
   };
 
-  // 3. Funciones de Login/Logout
-  const handleLogin = () => {
-    signInWithPopup(auth, googleProvider).catch((error) => {
-      setStatusMessage(`Error de Login: ${error.message}`);
-    });
-  };
+  const handleLogin = () => signInWithPopup(auth, googleProvider);
+  const handleLogout = () => signOut(auth);
 
-  const handleLogout = () => {
-    signOut(auth).catch((error) => {
-      setStatusMessage(`Error de Logout: ${error.message}`);
-    });
-  };
-
-
-  // Determinar si el botón debe estar deshabilitado
-  const isButtonDisabled = isAnimating || !user || statusMessage.includes('Permiso Denegado');
-
+  const isButtonDisabled = isAnimating || !user || statusMessage.includes('Denegado');
 
   return (
-    // Estructura de capas (ya no hay Flexbox de 3 columnas de color)
+    <main className="relative h-screen w-screen overflow-hidden bg-black">
+      
+      {/* CAPA 0: FONDO DE OFICINA */}
+      <div className="absolute inset-0 z-0">
+        <Image src="/fondo.png" alt="Fondo" fill className="object-cover opacity-40" priority />
+      </div>
 
-    <main className="relative h-screen w-screen overflow-hidden">
-
-
-      {/* 2. Fondo Total PNG: CUBRE TODA LA PANTALLA */}
-      <Image
-        src={OFFICIAL_BG_URL}
-        alt="Fondo oficial de la tómbola"
-        fill
-        className="object-cover" // Asegura que cubre todo y es responsivo
-        priority
-      />
-
-      {/* 3. Capa de Opacidad/Overlay: Aclarado */}
-      <div className="absolute inset-0 bg-black/0 backdrop-brightness-90" aria-hidden="true"></div>
-
-
-      {/* 4. Contenido Central (Flotante - z-10) */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center pt-32">
-
-
-        {/* Barra superior con Login/Logout */}
-        <div className="absolute top-0 right-0 z-20 p-4">
-          {user ? (
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-white/80 hidden md:inline">
-                Logueado como: {user.displayName || user.email}
-              </span>
-              <Button onClick={handleLogout} variant="secondary" size="sm" title="Cerrar Sesión">
-                <LogOut className="mr-2 h-4 w-4" /> Salir
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={handleLogin} variant="secondary" size="sm">
-              <LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión (Google)
+      {/* CAPA SUPERIOR: BOTÓN DE GOOGLE (Siempre visible y clickeable) */}
+      <div className="absolute top-4 right-4 z-50">
+        {user ? (
+          <div className="flex items-center gap-3">
+            <span className="text-white/70 text-sm hidden md:block">{user.displayName}</span>
+            <Button onClick={handleLogout} variant="secondary" size="sm">
+              <LogOut className="mr-2 h-4 w-4" /> Salir
             </Button>
-          )}
+          </div>
+        ) : (
+          <Button onClick={handleLogin} variant="secondary" size="sm">
+            <LogIn className="mr-2 h-4 w-4" /> Iniciar Sesión
+          </Button>
+        )}
+      </div>
+
+      {/* CONTENEDOR MAESTRO DE ENCUADRE */}
+      <div className="relative z-10 h-full w-full flex items-center justify-center">
+        <div className="relative w-full h-full max-w-[1920px] max-h-[1080px] aspect-video">
+          
+          {/* CAPA 1: MARCO DE LA TÓMBOLA (base1.png) */}
+          <Image
+            src={OFFICIAL_BG_URL}
+            alt="Marco Tómbola"
+            fill
+            className="object-contain z-10 pointer-events-none" 
+            priority
+          />
+
+          {/* CAPA 2: DÍGITOS (Ajustados a la izquierda y compactos) */}
+          <div 
+            className="absolute z-30 flex justify-between"
+            style={{
+              top: '45.5%',  
+              left: '10%',    // Izquierda
+              width: '68%',  // Compacto
+              height: '10%'
+            }}
+          >
+            {code.split('').map((digit, index) => (
+              <div
+                key={index}
+                className="flex flex-1 items-center justify-center text-white font-mono font-bold
+                           text-[5vw] md:text-[4vw] lg:text-[70px] leading-none"
+              >
+                {digit}
+              </div>
+            ))}
+          </div>
+
+          {/* CAPA 3: BOTÓN DE GENERAR */}
+          <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 z-40">
+            <Button
+              onClick={generateCode}
+              variant="default"
+              size="lg"
+              disabled={isButtonDisabled}
+              className="px-8 py-6 text-xl"
+            >
+              <RefreshCw className={`mr-3 h-6 w-6 ${isAnimating ? 'animate-spin' : ''}`} />
+              {isAnimating ? 'Generando...' : (user ? 'Generar Código' : 'Inicia Sesión')}
+            </Button>
+          </div>
+
         </div>
-
-
-        {/* Título y Mensajes */}
-        {/* <div className="max-w-md">
-          <h2 className="text-xl font-bold text-accent mb-2">Tómbola Segura</h2>
-          <p className="text-base text-primary-foreground/80 mb-6 md:text-lg md:mb-8">
-            {statusMessage}
-          </p>
-        </div> */}
-
-        {/* Display del Código */}
-        <div
-          className="flex w-full max-w-4xl mx-auto justify-start [gap:5.5rem] md:[gap:5.6rem] ml-36"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {code.split('').map((digit, index) => (
-            <div
-              key={index}
-              // Cajas INVISIBLES: Solo mantienen posicionamiento, centrado (leading-none), fuente y color del texto.
-              className="flex h-20 w-8 items-center justify-center text-4xl font-bold text-white 
-                       sm:h-24 sm:w-10 sm:text-5xl md:h-36 md:w-16 md:text-7xl 
-                       font-mono leading-none">
-              {digit}
-            </div>
-          ))}
-        </div>
-
-        {/* Botón de Sorteo */}
-        <Button
-          onClick={generateCode}
-          className="mt-10 md:mt-14"
-          variant="default"
-          size="lg"
-          disabled={isButtonDisabled}
-        >
-          <RefreshCw className={`mr-2 h-5 w-5 ${isAnimating ? 'animate-spin' : ''}`} />
-          {isAnimating ? 'Generando...' : (user ? 'Generar Nuevo Código' : 'Inicia Sesión')}
-        </Button>
       </div>
     </main>
   );
