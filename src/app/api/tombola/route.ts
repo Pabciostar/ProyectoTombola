@@ -108,8 +108,8 @@ export async function GET(request: Request) {
                 .pipe(csv())
                 .on('data', (row) => {
                     // AHORA BUSCAMOS EL CAMPO 'ScotiaID'
-                    if (row.ScotiaID && row.ScotiaID.trim() !== '') {
-                        ids.push(row.ScotiaID.trim());
+                    if (row.ID && row.ID.trim() !== '') {
+                        ids.push(row.ID.trim());
                     }
                 })
                 .on('end', () => resolve())
