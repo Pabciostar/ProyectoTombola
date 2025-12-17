@@ -1,6 +1,7 @@
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 import * as admin from 'firebase-admin';
+import * as fs from 'fs';
 
 // Inicialización del SDK Admin (Solo si no está inicializado)
 if (!admin.apps.length) {
@@ -17,9 +18,10 @@ if (!admin.apps.length) {
             } else {
                 // Código para entorno local
                 // eslint-disable-next-line @typescript-eslint/no-var-requires
-                serviceAccount = require(serviceAccountContentOrPath);
+                const fileContent = fs.readFileSync(serviceAccountContentOrPath, 'utf8'); // <-- ¡CAMBIO CRUCIAL!
+                serviceAccount = JSON.parse(fileContent);
             }
-            
+
             // 3. Inicialización
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
@@ -29,7 +31,7 @@ if (!admin.apps.length) {
 
         } catch (e: any) {
             console.error(
-                "❌ ERROR CRÍTICO EN FIREBASE INIT:", 
+                "❌ ERROR CRÍTICO EN FIREBASE INIT:",
                 e.message
             );
         }
@@ -70,10 +72,12 @@ export async function GET(request: Request) {
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
 
+        const ALLOWED_ROLES = ['admin', 'sorteador'];
+
         // **Verificación de Rol (El requisito 'admin'):**
         // Comprueba si el token contiene el Claim 'role: sorteador'
-        if (decodedToken.role !== 'sorteador') {
-            return Response.json({ error: "Permiso denegado. Se requiere el rol 'sorteador'." }, { status: 403 });
+        if (!ALLOWED_ROLES.includes(decodedToken.role)) { // <--- REEMPLAZAR LA LÍNEA
+            return Response.json({ error: "Permiso denegado. Se requiere el rol 'admin' o 'sorteador'." }, { status: 403 });
         }
 
     } catch (error) {

@@ -32,6 +32,8 @@ const googleProvider = new GoogleAuthProvider(); // Proveedor de Google
 // const CODES = ['10102020', '20304040', '30201010', '40908080'];
 
 
+
+
 export default function TombolaPage() {
   const [code, setCode] = useState('--------');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -54,6 +56,21 @@ export default function TombolaPage() {
     });
     return () => unsubscribe(); // Limpieza del listener
   }, []);
+
+  const getToken = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (token) {
+        console.log("🔥 TU ID TOKEN JWT DE ADMINISTRADOR ES:");
+        console.log(token);
+      } else {
+        console.log("Usuario no logueado o token no disponible.");
+      }
+    } catch (e) {
+      console.error("Error al obtener el token:", e);
+    }
+  };
+
 
 
   // 2. LÓGICA DE SORTEO MODIFICADA (Llama a la API Segura)
@@ -127,7 +144,9 @@ export default function TombolaPage() {
 
   return (
     // Estructura de capas (ya no hay Flexbox de 3 columnas de color)
+
     <main className="relative h-screen w-screen overflow-hidden">
+
 
       {/* 2. Fondo Total PNG: CUBRE TODA LA PANTALLA */}
       <Image
@@ -144,6 +163,7 @@ export default function TombolaPage() {
 
       {/* 4. Contenido Central (Flotante - z-10) */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center pt-32">
+
 
         {/* Barra superior con Login/Logout */}
         <div className="absolute top-0 right-0 z-20 p-4">
@@ -194,7 +214,7 @@ export default function TombolaPage() {
         <Button
           onClick={generateCode}
           className="mt-10 md:mt-14"
-          variant="default" 
+          variant="default"
           size="lg"
           disabled={isButtonDisabled}
         >
