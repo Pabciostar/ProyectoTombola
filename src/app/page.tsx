@@ -125,8 +125,8 @@ export default function TombolaPage() {
             className="absolute z-30 flex justify-between"
             style={{
               top: '45.5%',  
-              left: '10%',    // Izquierda
-              width: '70%',  // Compacto
+              left: '8%',    // Izquierda
+              width: '73%',  // Compacto
               height: '10%'
             }}
           >
