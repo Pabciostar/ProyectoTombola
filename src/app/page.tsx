@@ -11,6 +11,8 @@ import { initializeApp } from "firebase/app";
 // 1. CONFIGURACIÓN E IMÁGENES
 // ----------------------------------------------------
 const OFFICIAL_BG_URL = '/base1.png';
+// URL generada con tu bucket y token de Firebase Storage
+const BACKGROUND_VIDEO_URL = "https://firebasestorage.googleapis.com/v0/b/proyectotombola-51309.firebasestorage.app/o/Programa%20TRAINEE%20HORIZONTAL%202.mp4?alt=media&token=e92f5e18-64a5-40f1-999a-9615882c820f";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBeaDm9nv8fcXXlxr4oo46OWOLeuDyTIY0",
@@ -86,9 +88,19 @@ export default function TombolaPage() {
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-black">
       
-      {/* CAPA 0: FONDO DE OFICINA */}
+      {/* CAPA 0: VIDEO DE FONDO */}
       <div className="absolute inset-0 z-0">
-        <Image src="/fondo.png" alt="Fondo" fill className="object-cover opacity-40" priority />
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover opacity-60"
+        >
+          <source src={BACKGROUND_VIDEO_URL} type="video/mp4" />
+          Tu navegador no soporta videos.
+        </video>
+        <div className="absolute inset-0 bg-black/10 z-[1]"></div>
       </div>
 
       {/* CAPA SUPERIOR: BOTÓN DE GOOGLE (Siempre visible y clickeable) */}
