@@ -28,4 +28,4 @@ env:
     value: https://proyectotombola--proyectotombola-51309.us-east4.hosted.app/ 
 
   - variable: GOOGLE_SHEET_CSV_URL
-    value: https://docs.google.com/spreadsheets/d/1cPUV4g8G3gKS_CFI65eMqx0TyTSgS1a7debqb6d4AgI/export?format=csv
+    value: https://docs.google.com/spreadsheets/d/e/2PACX-1vSi2qCJ3jkKp8yLIejPQmmzx3wwLNwvyRa-k2F4Pw40ksp7bTSJxPQdaKP5nYNbutulyIcBmPcPGG1q/pub?output=csv

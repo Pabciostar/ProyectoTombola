@@ -5,7 +5,6 @@ import * as fs from 'fs';
 
 // Inicialización del SDK Admin (Solo si no está inicializado)
 if (!admin.apps.length) {
-    // Renombramos la variable para reflejar que puede ser contenido o ruta
     const serviceAccountContentOrPath = process.env.FIREBASE_ADMIN_CREDENTIALS_PATH;
 
     if (serviceAccountContentOrPath) {
@@ -13,16 +12,12 @@ if (!admin.apps.length) {
             let serviceAccount;
 
             if (serviceAccountContentOrPath.trim().startsWith('{')) {
-                // Ahora parseamos DIRECTAMENTE, confiando en que Secret Manager envió el JSON correcto
                 serviceAccount = JSON.parse(serviceAccountContentOrPath);
             } else {
-                // Código para entorno local
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const fileContent = fs.readFileSync(serviceAccountContentOrPath, 'utf8'); // <-- ¡CAMBIO CRUCIAL!
+                const fileContent = fs.readFileSync(serviceAccountContentOrPath, 'utf8');
                 serviceAccount = JSON.parse(fileContent);
             }
 
-            // 3. Inicialización
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
                 projectId: serviceAccount.project_id || "proyectotombola-51309",
@@ -30,104 +25,89 @@ if (!admin.apps.length) {
             console.log("✅ Admin SDK inicializado.");
 
         } catch (e: any) {
-            console.error(
-                "❌ ERROR CRÍTICO EN FIREBASE INIT:",
-                e.message
-            );
+            console.error("❌ ERROR CRÍTICO EN FIREBASE INIT:", e.message);
         }
     } else {
         console.error("ERROR: Clave de servicio Admin no configurada.");
     }
 }
 
-// *** AHORA LEEMOS LAS VARIABLES DEL ENTORNO ***
 const GOOGLE_SHEET_CSV_URL = process.env.GOOGLE_SHEET_CSV_URL || '';
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '';
 
-/**
- * Función de seguridad para verificar el origen (dominio) de la solicitud.
- */
 function isAuthorizedOrigin(request: Request): boolean {
     const referer = request.headers.get('referer');
-
-    // Falla si no se configuró la variable o si el referer no es el dominio permitido.
     return !!(ALLOWED_ORIGIN && referer && referer.startsWith(ALLOWED_ORIGIN));
 }
 
 export async function GET(request: Request) {
-    // 1. **VERIFICACIÓN DE SEGURIDAD: Origen de la Solicitud**
+    // 1. VERIFICACIÓN DE SEGURIDAD
     if (!isAuthorizedOrigin(request)) {
-        return Response.json({ error: "Acceso denegado: Solicitud fuera del dominio autorizado." }, { status: 403 });
+        return Response.json({ error: "Acceso denegado." }, { status: 403 });
     }
 
-    // --- 2. VERIFICACIÓN DE AUTORIZACIÓN (Login y Rol) ---
+    // 2. VERIFICACIÓN DE AUTORIZACIÓN
     const authHeader = request.headers.get('Authorization');
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return Response.json({ error: "No autorizado. Token de usuario requerido." }, { status: 401 });
+        return Response.json({ error: "No autorizado." }, { status: 401 });
     }
 
     const idToken = authHeader.split('Bearer ')[1];
 
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
-
         const ALLOWED_ROLES = ['admin', 'sorteador'];
 
-        // **Verificación de Rol (El requisito 'admin'):**
-        // Comprueba si el token contiene el Claim 'role: sorteador'
-        if (!ALLOWED_ROLES.includes(decodedToken.role)) { // <--- REEMPLAZAR LA LÍNEA
-            return Response.json({ error: "Permiso denegado. Se requiere el rol 'admin' o 'sorteador'." }, { status: 403 });
+        if (!ALLOWED_ROLES.includes(decodedToken.role)) {
+            return Response.json({ error: "Permiso denegado." }, { status: 403 });
         }
-
     } catch (error) {
-        console.error("Error al verificar token:", error);
-        return Response.json({ error: "Token inválido o expirado. Vuelve a iniciar sesión." }, { status: 401 });
+        return Response.json({ error: "Token inválido." }, { status: 401 });
     }
 
-    // 3. Comprobar que la URL del Sheet esté configurada
     if (!GOOGLE_SHEET_CSV_URL) {
-        return Response.json({ error: "URL de Google Sheet no configurada en el servidor." }, { status: 500 });
+        return Response.json({ error: "Configuración incompleta." }, { status: 500 });
     }
 
     try {
-        // 4. DESCARGAR Y LEER EL CSV DE GOOGLE SHEETS
+        // 4. DESCARGAR CSV
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
-
         if (!response.ok) {
-            console.error("Error al descargar la hoja:", response.status, response.statusText);
-            return Response.json({ error: 'Error al acceder a Google Sheet. Verifica la configuración de la hoja (pública).' }, { status: 503 });
+            return Response.json({ error: 'Error al acceder a la fuente de datos.' }, { status: 503 });
         }
 
         const fileContent = await response.text();
-        const ids: string[] = [];
+        const entries: string[] = [];
 
-        // 5. PROCESAMIENTO CSV Y EXTRACCIÓN DE IDS
+        // 5. PROCESAMIENTO CSV
         await new Promise<void>((resolve, reject) => {
             Readable.from(fileContent)
                 .pipe(csv())
                 .on('data', (row) => {
-                    // AHORA BUSCAMOS EL CAMPO 'ScotiaID'
-                    if (row.ID && row.ID.trim() !== '') {
-                        ids.push(row.ID.trim());
+                    // Buscamos cualquier columna que se refiera al Correo o Email
+                    // Si no existe, usamos row.ID como último recurso.
+                    const value = row.Correo || row.correo || row.Email || row.email || row.EMAIL || row.ID; 
+                    
+                    if (value && value.trim() !== '') {
+                        entries.push(value.trim().toUpperCase());
                     }
                 })
                 .on('end', () => resolve())
                 .on('error', (error) => reject(error));
         });
 
-        if (ids.length === 0) {
-            return Response.json({ error: "No se encontraron IDs válidos en la hoja. (¿Fila de encabezado 'ID'?) " }, { status: 404 });
+        if (entries.length === 0) {
+            return Response.json({ error: "No se encontraron datos en la hoja." }, { status: 404 });
         }
 
         // 6. LÓGICA DE SORTEO
-        const randomIndex = Math.floor(Math.random() * ids.length);
-        const selectedID = ids[randomIndex];
+        const randomIndex = Math.floor(Math.random() * entries.length);
+        const selectedName = entries[randomIndex];
 
-        return Response.json({ selectedID, total: ids.length }, { status: 200 });
+        return Response.json({ selectedName, total: entries.length }, { status: 200 });
 
     } catch (error) {
-        console.error("Error en el sorteo de tómbola:", error);
-        return Response.json({ error: "Error interno del servidor al realizar el sorteo." }, { status: 500 });
+        console.error("Error en el sorteo:", error);
+        return Response.json({ error: "Error interno del servidor." }, { status: 500 });
     }
 }
