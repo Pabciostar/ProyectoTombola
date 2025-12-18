@@ -120,32 +120,6 @@ export default function TombolaPage() {
           </Button>
         )}
 
-        {/* HASHTAG MASIVO */}
-        {/* HASHTAG LEGIBLE Y POTENTE */}
-        <span
-          className="
-    text-[22px] lg:text-[28px] 
-    text-white /* Letra blanca para que resalte sobre el brillo */
-    font-black 
-    tracking-tight uppercase
-    select-none
-  "
-          style={{
-            /* El truco: un borde negro sutil alrededor de la letra (text-stroke alternativo) 
-               seguido del resplandor cyan */
-            textShadow: `
-      -1px -1px 0 #000,  
-       1px -1px 0 #000,
-      -1px  1px 0 #000,
-       1px  1px 0 #000,
-       0 0 10px rgba(34,211,238,0.8), 
-       0 0 20px rgba(34,211,238,0.4)
-    `,
-            fontFamily: 'sans-serif'
-          }}
-        >
-          #IMPULSATUFUTUROSCOTIABANKTRAINEE
-        </span>
       </div>
 
       {/* CONTENEDOR CENTRAL */}
