@@ -113,11 +113,6 @@ export default function TombolaPage() {
         alt="Borde Izquierdo"
         className="absolute top-0 left-0 h-full w-auto z-20 pointer-events-none select-none"
       />
-      <img
-        src={RIGHT_BORDER_URL}
-        alt="Borde Derecho"
-        className="absolute top-0 right-0 h-full w-auto z-20 pointer-events-none select-none"
-      />
 
 
       {/* LOGIN/LOGOUT (Esquina superior derecha) */}
