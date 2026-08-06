@@ -1,5 +1,19 @@
-# Firebase Studio
+# Raffle & Giveaway System
 
-This is a NextJS starter in Firebase Studio.
+Interactive raffle tool built for live promotional events, delivering real-time audience
+engagement at corporate gatherings.
 
-To get started, take a look at src/app/page.tsx.
+## Features
+
+- Google-authenticated admin flow
+- Attendee list imported from a spreadsheet
+- Animated real-time winner draw with a fast-cycling name reveal
+- Repeat-winner exclusion within a session
+
+## Tech Stack
+
+Next.js, React, TypeScript, Tailwind CSS, xlsx
+
+---
+
+Part of [Pablo López's](https://github.com/Pabciostar) portfolio of client work.
